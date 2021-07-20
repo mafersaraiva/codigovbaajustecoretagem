@@ -1,0 +1,86 @@
+Sub saldos()
+
+
+'Deixando o código mais rápido
+Application.ScreenUpdating = False
+
+
+'Nomeando as variáveis
+Dim LastRow As Integer
+Dim LastCol As Integer
+Dim SOMA As Double
+Dim COD As Double
+Dim lin As Double
+Dim llin As Double
+Dim data As Date
+Dim assessor As String
+
+
+'Perguntando o pregão e o assessor para por na planilha
+data = InputBox("Pregão:")
+assessor = InputBox("Código do assessor solicitante:")
+
+
+'calculando a última linha e última coluna
+LastCol = ActiveSheet.Cells(1, ActiveSheet.Columns.Count).End(xlToLeft).Column
+LastRow = ActiveSheet.Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
+
+
+'essa parte filtra as orderns fechadas na íntegra e realizadas pelo robô pnt
+For i = 2 To LastRow
+x = Left(CStr(Cells(i, "R")), 3)
+Y = Left(CStr(Cells(i, "M")), 4)
+Do While Left(CStr(Cells(i, "R")), 3) <> "PNT" Or Left(CStr(Cells(i, "M")), 4) <> "[TX]"
+Rows(i).Delete Shift:=xlUp
+If Left(CStr(Cells(i, "R")), 3) = "" Then GoTo Final_loop
+LastRow = ActiveSheet.Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
+Loop
+Next i
+Final_loop:
+
+
+'Atualizando a última linha
+LastRow = ActiveSheet.Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
+
+
+'Calculando a corretagem
+For i = 2 To LastRow
+Cells(i, "P") = Cells(i, "I") * Cells(i, "L") * 0.0025
+Next i
+
+
+'Colando os códigos dos clientes sem duplicatas na planilha modelo da XP
+Range("C2", Range("C2").End(xlDown)).Copy Workbooks("Ajuste").Worksheets("Planilha1").Range("A2")
+Windows("Ajuste").Activate
+ActiveSheet.Range("INTERVALO").RemoveDuplicates Columns:=Array(1), Header:=xlYes
+
+
+'Calculando a última linha da planilha ajuste
+llin = ActiveSheet.Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
+
+
+'Somandoa corretagem de cada cliente
+For i = 2 To llin
+SOMA = 0
+COD = ActiveSheet.Cells(i, 1)
+Windows("20210615").Activate
+LastRow = ActiveSheet.Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
+    For lin = 2 To LastRow
+        If Cells(lin, 3) = COD Then
+        SOMA = SOMA + Cells(lin, 16)
+        End If
+    Next lin
+Windows("Ajuste").Activate
+
+
+'Colando os valores na planilha ajuste
+ActiveSheet.Cells(i, 4) = SOMA
+ActiveSheet.Cells(i, 2) = data
+ActiveSheet.Cells(i, 5) = assessor
+ActiveSheet.Cells(i, 3) = "Ações/FIIs/Termo/Exercício de Opções"
+ActiveSheet.Cells(i, 6) = "Acordo comercial com o cliente"
+Next i
+
+Application.ScreenUpdating = True
+
+End Sub
