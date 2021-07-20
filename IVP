@@ -59,7 +59,7 @@ ActiveSheet.Range("INTERVALO").RemoveDuplicates Columns:=Array(1), Header:=xlYes
 llin = ActiveSheet.Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
 
 
-'Somandoa corretagem de cada cliente
+'Somando a corretagem de cada cliente
 For i = 2 To llin
 SOMA = 0
 COD = ActiveSheet.Cells(i, 1)
